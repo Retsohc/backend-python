@@ -35,12 +35,14 @@ def obtener_productos():
     productos, error = execute_query(query)
     if error:
         return error
+    if not productos:
+        return success_response([], message='No hay productos disponibles')
     return success_response(productos)
 
 @productos_bp.route('/productos/<int:id>', methods=['GET'])
 def obtener_producto(id):
     query = 'SELECT * FROM productos WHERE id = %s'
-    producto, error = execute_query(query, (id), fetchone=True)
+    producto, error = execute_query(query, (id,), fetchone=True)
     if error:
         return error
     if producto:
@@ -56,6 +58,7 @@ def agregar_producto():
 
     query = 'INSERT INTO productos (title, price, description, category) VALUES (%s, %s, %s, %s)'
     conn = get_connection()
+
     if conn is None:
         return error_response('Error en la conexión a la base de datos')
     cursor = conn.cursor()
@@ -72,6 +75,10 @@ def agregar_producto():
 @productos_bp.route('/productos/<int:id>', methods=['PUT'])
 def actualizar_producto(id):
     data = request.json
+    required_fields = ['title', 'price', 'description', 'category']
+    if not all(field in data for field in required_fields):
+        return bad_request_response('Todos los campos son obligatorios')
+    
     query = '''
     UPDATE productos 
     SET title = %s, price = %s, description = %s, category = %s
@@ -102,9 +109,9 @@ def eliminar_producto(id):
         return error_response('Error en la conexión a la base de datos')
     cursor = conn.cursor()
     try:
-        cursor.execute(query, (id))
+        cursor.execute(query, (id,))
         conn.commit()
-        return success_response(message='Producto eliminado correctamente', status_code=204)
+        return '', 204
     except Exception as e:
         return error_response('Error al eliminar el producto', details=str(e))
     finally:

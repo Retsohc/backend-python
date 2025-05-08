@@ -9,7 +9,6 @@ def get_connection():
             password='',
             database='db_products',
             port=3306,
-
         )
         if connection.is_connected():
             print("Conectado a la base de datos MySQL")

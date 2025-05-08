@@ -7,11 +7,12 @@ def get_connection():
             host='localhost',
             user='root',
             password='',
-            database='productos_db'
+            database='db_products',
+            port=3306,
+
         )
         if connection.is_connected():
             print("Conectado a la base de datos MySQL")
             return connection
     except Error as e:
         print(f"Error conectando a la base de datos: {e}")
-        return None

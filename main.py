@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from src.services.productos_services import productos_bp
+from src.routes.productos_routes import productos_bp
 
 app = Flask(__name__)
 CORS(app, resources={r"/productos*": {"origins": "http://localhost:4200"}})

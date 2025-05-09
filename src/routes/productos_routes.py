@@ -1,31 +1,27 @@
-from flask import Blueprint, request, jsonify
-from services.productos_services import (
-    obtener_todos, obtener_por_id, crear_producto,
-    actualizar_producto, eliminar_producto
-)
+from flask import Blueprint, jsonify
+from src.api.fakestore_api import obtener_producto_externo_por_id, obtener_producto_externos
+from src.services.productos_services import guardar_producto_externo
+from src.utils.response_handler import error_response
 
-productos_bp = Blueprint('productos', __name__)
+productos_bp = Blueprint('productos_bp', __name__)
 
-@productos_bp.route('/', methods=['GET'])
-def home():
-    return 'Bienvenido a la API de productos'
+@productos_bp.route('/productos-externos', methods=['GET'])
+def obtener_producto_externos():
+    producto, error = obtener_producto_externos()
+    if error:
+        return jsonify({'success': False, 'message': 'Error al obtener productos externos', 'details': error}), 500
+    return jsonify({'success': True, 'data': producto})
 
-@productos_bp.route('/productos', methods=['GET'])
-def obtener_productos():
-    return obtener_todos()
+@productos_bp.route('/productos-externos/<int:id>', methods=['GET'])
+def obtener_producto_externo(id):
+    producto, error = obtener_producto_externo_por_id(id)
+    if error:
+        return jsonify({'success': False, 'message': 'Error al obtener producto externo', 'details': error}), 500
+    return jsonify({'success': True, 'data': producto})
 
-@productos_bp.route('/productos/<int:id>', methods=['GET'])
-def obtener_producto(id):
-    return obtener_por_id(id)
-
-@productos_bp.route('/productos', methods=['POST'])
-def agregar_producto():
-    return crear_producto(request.json)
-
-@productos_bp.route('/productos/<int:id>', methods=['PUT'])
-def actualizar_producto_route(id):
-    return actualizar_producto(id, request.json)
-
-@productos_bp.route('/productos/<int:id>', methods=['DELETE'])
-def eliminar_producto_route(id):
-    return eliminar_producto(id)
+@productos_bp.route('/productos-externos/<int:id>/guardar', methods=['POST'])
+def guardar_producto_externo_route(id):
+    producto, error = obtener_producto_externo_por_id(id)
+    if error:
+        return error_response('Error al obtener el producto externo', details=error)
+    return guardar_producto_externo(producto)

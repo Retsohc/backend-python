@@ -7,7 +7,7 @@ def obtener_producto_externos():
         response = requests.get(f'{BASE_URL}/products')
         response.raise_for_status()
         productos = response.json()
-        return productos[:20], None
+        return productos, None
     except requests.RequestException as e:
         return None, str(e)
 
